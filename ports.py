@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import keyboard
+import memory
+
 
 
 def xInFE(port: int) -> int:
@@ -75,7 +77,8 @@ PORTMAP = [
 current_border = 0
 
 def port_in(portnum: int) -> int:
-    #print('port: ', portnum, type(portnum))
+    #if portnum != 254:
+    #    print('port: ', hex(portnum))
     for mask, value, _, _, _, fin, _ in PORTMAP:
         if portnum & mask == value & mask:
             return fin(portnum) if fin else 0xff
@@ -83,8 +86,12 @@ def port_in(portnum: int) -> int:
 
 
 def port_out(portnum: int, data: int):
-    for mask, value, _, _, _, _, fout in PORTMAP:
-        if portnum & mask == value & mask:
-            if fout:
-                fout(portnum, data)
-            break
+    if portnum == 0x7ffd:
+        #print('memory bank switch: ', hex(portnum),' = ', hex(data))
+        memory.memorySwitch(data)
+    else:
+        for mask, value, _, _, _, _, fout in PORTMAP:
+            if portnum & mask == value & mask:
+                if fout:
+                    fout(portnum, data)
+                break
